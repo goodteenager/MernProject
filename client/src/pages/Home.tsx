@@ -14,6 +14,10 @@ const Home: React.FC = () => {
     setCount((count) => count + 1);
   };
 
+
+
+
+
   // Для неавторизованных пользователей - минималистичный лендинг
   if (!isAuthenticated) {
     return (
