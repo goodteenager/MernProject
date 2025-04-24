@@ -1,3 +1,5 @@
+const ErrorResponse = require('../utils/errorResponse');
+
 // Middleware для логирования ошибок
 exports.errorLogger = (err, req, res, next) => {
   console.error(`[${new Date().toISOString()}] ERROR:`, err);
@@ -9,37 +11,44 @@ exports.errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Ошибка дубликата в MongoDB
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyValue).join(', ');
-    error.message = `Дублирование поля ${field}. Пожалуйста, используйте другое значение.`;
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
+  // Логирование ошибок в консоль для разработки
+  console.log(err.stack.red);
 
-  // Ошибка валидации Mongoose
-  if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map(val => val.message);
-    return res.status(400).json({
-      success: false,
-      message: messages.join(', '),
-    });
-  }
-
-  // Неверный ID в Mongoose
+  // Ошибка MongoDB: неверный ID
   if (err.name === 'CastError') {
-    error.message = `Ресурс с ID ${err.value} не найден`;
-    return res.status(404).json({
-      success: false,
-      message: error.message,
-    });
+    const message = 'Ресурс не найден';
+    error = new ErrorResponse(message, 404);
   }
 
-  // Стандартный ответ
+  // Ошибка MongoDB: дублирующееся поле
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyValue)[0];
+    const message = `Поле ${field} должно быть уникальным`;
+    error = new ErrorResponse(message, 400);
+  }
+
+  // Ошибка MongoDB: ошибка валидации
+  if (err.name === 'ValidationError') {
+    const message = Object.values(err.errors).map(val => val.message);
+    error = new ErrorResponse(message, 400);
+  }
+
+  // Ошибка JWT: истекший токен
+  if (err.name === 'TokenExpiredError') {
+    const message = 'Срок действия токена истек. Пожалуйста, войдите снова';
+    error = new ErrorResponse(message, 401);
+  }
+
+  // Ошибка JWT: недействительный токен
+  if (err.name === 'JsonWebTokenError') {
+    const message = 'Недействительный токен. Пожалуйста, войдите снова';
+    error = new ErrorResponse(message, 401);
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
-    message: error.message || 'Внутренняя ошибка сервера',
+    error: error.message || 'Ошибка сервера'
   });
 };
+
+module.exports = exports.errorHandler;

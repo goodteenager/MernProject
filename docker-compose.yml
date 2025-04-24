@@ -1,7 +1,6 @@
-version: '3'
+version: '3.8'
 
 services:
-  # MongoDB сервис
   mongo:
     image: mongo:latest
     ports:
@@ -11,7 +10,6 @@ services:
     networks:
       - mern-network
 
-  # Добавляем MongoDB Express (веб-интерфейс для MongoDB)
   mongo-express:
     image: mongo-express
     ports:
@@ -26,50 +24,39 @@ services:
     networks:
       - mern-network
 
-  # Первый сервер Express (server1)
   server1:
-    build: 
+    build:
       context: ./server
       dockerfile: Dockerfile
-    # Убираем внешнее отображение порта, так как теперь доступ будет через балансировщик
-    expose:
-      - "5000"
-    depends_on:
-      - mongo
     environment:
+      - JWT_EXPIRE=30
       - PORT=5000
       - MONGO_URI=mongodb://mongo:27017/mernapp
       - JWT_SECRET=your_jwt_secret_key
       - NODE_ENV=development
       - SERVER_ID=server1
-    volumes:
-      - ./server:/app
-      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - mern-network
 
-  # Второй сервер Express (server2) - копия первого
   server2:
-    build: 
+    build:
       context: ./server
       dockerfile: Dockerfile
-    expose:
-      - "5000"
-    depends_on:
-      - mongo
     environment:
+      - JWT_EXPIRE=30
       - PORT=5000
       - MONGO_URI=mongodb://mongo:27017/mernapp
       - JWT_SECRET=your_jwt_secret_key
       - NODE_ENV=development
       - SERVER_ID=server2
-    volumes:
-      - ./server:/app
-      - /app/node_modules
     networks:
       - mern-network
 
-  # Балансировщик нагрузки (Nginx)
   load-balancer:
     image: nginx:alpine
     ports:
@@ -79,21 +66,16 @@ services:
     depends_on:
       - server1
       - server2
+      - client
     networks:
       - mern-network
 
-  # Клиентская часть (React + Vite)
   client:
-    build: 
+    build:
       context: ./client
       dockerfile: Dockerfile
-    ports:
-      - "3000:5173"
     environment:
-      - VITE_API_URL=http://localhost:5000
-    volumes:
-      - ./client:/app
-      - /app/node_modules
+      - VITE_API_URL=http://load-balancer/api/v1  # Используйте публичный URL балансировщика
     networks:
       - mern-network
 
@@ -104,4 +86,3 @@ networks:
 volumes:
   mongo-data:
     driver: local
-

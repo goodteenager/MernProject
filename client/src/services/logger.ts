@@ -2,168 +2,131 @@
  * Система логирования для фронтенда
  * Позволяет включать/выключать логирование
  */
+import { message as messageApi } from 'antd';
+
+interface LogEntry {
+  timestamp: string;
+  level: string;
+  component: string;
+  message: string;
+}
+
 class Logger {
-  private enabled: boolean = true;
-  private componentLogs: Map<string, boolean> = new Map();
-  private logHistory: Array<{
-    timestamp: string;
-    level: string;
-    component: string;
-    message: string;
-    data?: any;
-  }> = [];
+  private static instance: Logger;
+  private history: LogEntry[] = [];
+  private enabled = true;
+  private consoleEnabled = true;
+  private maxHistorySize = 1000; // Ограничение размера истории логов
 
-  constructor() {
-    // Восстанавливаем состояние из localStorage, если есть
-    const savedState = localStorage.getItem('logger_state');
-    if (savedState) {
-      try {
-        const state = JSON.parse(savedState);
-        this.enabled = state.enabled;
+  // Приватный конструктор для реализации паттерна Singleton
+  private constructor() {}
 
-        // Восстанавливаем состояние для отдельных компонентов
-        if (state.componentLogs) {
-          this.componentLogs = new Map(Object.entries(state.componentLogs));
-        }
-      } catch (e) {
-        console.error('Ошибка при разборе сохраненного состояния логгера:', e);
-      }
+  // Метод для получения экземпляра логгера
+  public static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
     }
+    return Logger.instance;
   }
 
-  /**
-   * Включает логирование для всех или конкретного компонента
-   */
-  enable(component?: string): void {
-    if (component) {
-      this.componentLogs.set(component, true);
-    } else {
-      this.enabled = true;
-    }
-    this.saveState();
+  // Включение/выключение логирования
+  public enable(enabled: boolean): void {
+    this.enabled = enabled;
   }
 
-  /**
-   * Выключает логирование для всех или конкретного компонента
-   */
-  disable(component?: string): void {
-    if (component) {
-      this.componentLogs.set(component, false);
-    } else {
-      this.enabled = false;
-    }
-    this.saveState();
+  // Включение/выключение вывода в консоль
+  public enableConsole(enabled: boolean): void {
+    this.consoleEnabled = enabled;
   }
 
-  /**
-   * Проверяет, включено ли логирование для компонента
-   */
-  isEnabled(component?: string): boolean {
-    if (component && this.componentLogs.has(component)) {
-      return this.componentLogs.get(component) as boolean;
-    }
-    return this.enabled;
-  }
-
-  /**
-   * Сохраняет состояние логгера в localStorage
-   */
-  private saveState(): void {
-    const state = {
-      enabled: this.enabled,
-      componentLogs: Object.fromEntries(this.componentLogs),
-    };
-    localStorage.setItem('logger_state', JSON.stringify(state));
-  }
-
-  /**
-   * Добавляет запись в историю логов
-   */
-  private addToHistory(level: string, component: string, message: string, data?: any): void {
-    this.logHistory.push({
+  // Добавление записи в историю логов
+  private addToHistory(level: string, component: string, message: string): void {
+    const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       component,
       message,
-      data
-    });
-
+    };
+    
+    // Добавляем запись в начало массива для более простой сортировки
+    this.history.unshift(entry);
+    
     // Ограничиваем размер истории
-    if (this.logHistory.length > 1000) {
-      this.logHistory = this.logHistory.slice(-1000);
+    if (this.history.length > this.maxHistorySize) {
+      this.history = this.history.slice(0, this.maxHistorySize);
     }
   }
 
-  /**
-   * Возвращает историю логов
-   */
-  getHistory(): Array<any> {
-    return [...this.logHistory];
+  // Получение истории логов
+  public getHistory(): LogEntry[] {
+    return [...this.history];
   }
 
-  /**
-   * Очищает историю логов
-   */
-  clearHistory(): void {
-    this.logHistory = [];
+  // Очистка истории логов
+  public clearHistory(): void {
+    this.history = [];
   }
 
-  /**
-   * Логирование информационных сообщений
-   */
-  info(component: string, message: string, data?: any): void {
-    if (!this.isEnabled(component)) return;
-
-    console.info(`[INFO][${component}] ${message}`, data || '');
-    this.addToHistory('info', component, message, data);
+  // Лог информационного сообщения
+  public info(component: string, message: string): void {
+    if (!this.enabled) return;
+    
+    this.addToHistory('info', component, message);
+    
+    if (this.consoleEnabled) {
+      console.info(`[INFO][${component}] ${message}`);
+    }
   }
 
-  /**
-   * Логирование предупреждений
-   */
-  warn(component: string, message: string, data?: any): void {
-    if (!this.isEnabled(component)) return;
-
-    console.warn(`[WARN][${component}] ${message}`, data || '');
-    this.addToHistory('warn', component, message, data);
+  // Лог предупреждения
+  public warn(component: string, message: string): void {
+    if (!this.enabled) return;
+    
+    this.addToHistory('warn', component, message);
+    
+    if (this.consoleEnabled) {
+      console.warn(`[WARN][${component}] ${message}`);
+    }
   }
 
-  /**
-   * Логирование ошибок
-   */
-  error(component: string, message: string, data?: any): void {
-    if (!this.isEnabled(component)) return;
-
-    console.error(`[ERROR][${component}] ${message}`, data || '');
-    this.addToHistory('error', component, message, data);
+  // Лог ошибки
+  public error(component: string, message: string, showNotification = false): void {
+    if (!this.enabled) return;
+    
+    this.addToHistory('error', component, message);
+    
+    if (this.consoleEnabled) {
+      console.error(`[ERROR][${component}] ${message}`);
+    }
+    
+    // Опционально показываем всплывающее уведомление
+    if (showNotification) {
+      messageApi.error(`[${component}] ${message}`);
+    }
   }
 
-  /**
-   * Логирование DEBUG сообщений
-   */
-  debug(component: string, message: string, data?: any): void {
-    if (!this.isEnabled(component)) return;
-
-    console.debug(`[DEBUG][${component}] ${message}`, data || '');
-    this.addToHistory('debug', component, message, data);
+  // Лог отладочной информации
+  public debug(component: string, message: string): void {
+    if (!this.enabled) return;
+    
+    this.addToHistory('debug', component, message);
+    
+    if (this.consoleEnabled) {
+      console.debug(`[DEBUG][${component}] ${message}`);
+    }
   }
 
-  /**
-   * Логирование монтирования компонента
-   */
-  mounted(component: string): void {
-    this.info(component, 'Компонент смонтирован');
+  // Лог монтирования компонента
+  public componentDidMount(component: string): void {
+    this.debug(component, 'Component mounted');
   }
 
-  /**
-   * Логирование размонтирования компонента
-   */
-  unmounted(component: string): void {
-    this.info(component, 'Компонент размонтирован');
+  // Лог размонтирования компонента
+  public componentWillUnmount(component: string): void {
+    this.debug(component, 'Component will unmount');
   }
 }
 
-// Создаем единственный экземпляр логгера
-const logger = new Logger();
-
+// Экспортируем единственный экземпляр
+const logger = Logger.getInstance();
 export default logger;

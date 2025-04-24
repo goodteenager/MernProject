@@ -3,31 +3,31 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
   h1 {
     font-size: 1.75rem;
   }
-  
+
   h2 {
     font-size: 1.25rem;
   }
-  
+
   .card {
     border-radius: 0.5rem;
   }
-  
+
   .card-header, .card-body, .card-footer {
     padding: 1rem;
   }
-  
+
   .btn {
     padding: 0.5rem 0.75rem;
   }
-  
+
   .hidden-mobile {
     display: none;
   }
-  
+
   .mobile-menu {
     position: fixed;
     bottom: 0;
@@ -40,24 +40,24 @@
     padding: 0.75rem 1rem;
     z-index: 50;
   }
-  
+
   .mobile-menu-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     font-size: 0.75rem;
   }
-  
+
   .mobile-menu-icon {
     margin-bottom: 0.25rem;
   }
-  
+
   main {
     padding-top: 1.5rem;
     padding-bottom: 5rem;
   }
-  
+
   input, button {
     font-size: 16px;
   }
-} 
+}

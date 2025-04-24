@@ -1,56 +1,62 @@
 const jwt = require('jsonwebtoken');
+const asyncHandler = require('./async');
+const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/User');
 
-// Защита маршрутов - проверка авторизации
-exports.protect = async (req, res, next) => {
+// Защита маршрутов
+exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
-  // Проверяем наличие токена в заголовках
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  // Проверяем наличие токена в заголовке Authorization или в cookies
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    // Извлекаем токен из заголовка
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.token) {
+    // Извлекаем токен из cookie
+    token = req.cookies.token;
   }
 
-  // Проверяем существование токена
+  // Проверяем наличие токена
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Нет доступа. Авторизуйтесь для доступа к этому ресурсу',
-    });
+    return next(new ErrorResponse('Нет авторизации для доступа к данному ресурсу', 401));
   }
 
   try {
-    // Проверка токена
+    // Верификация токена
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Получаем пользователя из базы
-    const user = await User.findById(decoded.id);
+    // Получаем пользователя из БД
+    req.user = await User.findById(decoded.id);
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Пользователь с этим ID не найден',
-      });
+    // Проверяем существование пользователя
+    if (!req.user) {
+      return next(new ErrorResponse('Пользователь не найден', 401));
     }
 
-    // Добавляем пользователя в запрос
-    req.user = user;
+    // Проверяем активацию email (если требуется)
+    if (process.env.EMAIL_VERIFICATION === 'true' && !req.user.isEmailVerified) {
+      return next(new ErrorResponse('Пожалуйста, подтвердите свой email', 401));
+    }
+
     next();
   } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: 'Не удалось авторизоваться. Токен недействителен',
-    });
+    return next(new ErrorResponse('Нет авторизации для доступа к данному ресурсу', 401));
   }
-};
+});
 
 // Проверка роли пользователя
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: `Роль ${req.user.role} не имеет доступа к этому ресурсу`,
-      });
+      return next(
+        new ErrorResponse(
+          `Роль ${req.user.role} не имеет доступа к данному ресурсу`,
+          403
+        )
+      );
     }
     next();
   };
