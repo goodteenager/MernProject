@@ -1,130 +1,299 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { Typography, Row, Col, Button, Divider, Card, Badge, Space, Tabs } from 'antd';
+import {
+  SafetyOutlined,
+  BulbOutlined,
+  CheckSquareOutlined,
+  PlusOutlined,
+  LineChartOutlined,
+  UserOutlined
+} from '@ant-design/icons';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import LoggingControl from '../components/LoggingControl';
-import useLogger from '../hooks/useLogger';
+
+const { Title, Paragraph } = Typography;
+const { TabPane } = Tabs;
 
 const Home: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuth();
-  const logger = useLogger('HomePage');
+  const { theme } = useTheme();
   const [count, setCount] = useState(0);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   const handleIncrement = () => {
-    logger.info('Кнопка увеличения счетчика нажата');
-    setCount((count) => count + 1);
+    setCount(count + 1);
   };
 
-  // Для неавторизованных пользователей - минималистичный лендинг
+  const cardStyle = (index: number) => ({
+    height: '100%',
+    border: '1px solid #eee',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    transition: 'box-shadow 0.3s',
+    boxShadow: hoveredCard === index ? '0 4px 8px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
+    background: theme === 'dark' ? '#1f1f1f' : 'white',
+    color: theme === 'dark' ? 'white' : 'inherit'
+  });
+
+  // Неаутентифицированный интерфейс (главная страница)
   if (!isAuthenticated) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <section className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-4">MERN Stack Application</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Современное веб-приложение на стеке MongoDB, Express, React и Node.js с Docker-контейнеризацией
-          </p>
-        </section>
-        
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-card p-6 rounded border border-border">
-            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        textAlign: 'center',
+        padding: '40px 16px',
+        minHeight: 'calc(100vh - 100px)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}>
+        <Title level={1} style={{ fontWeight: 'bold', marginBottom: '20px' }}>
+          MERN Stack Application
+        </Title>
+
+        <Paragraph style={{
+          fontSize: '1.2rem',
+          maxWidth: '700px',
+          margin: '0 auto 40px',
+          color: theme === 'dark' ? '#bbb' : '#666'
+        }}>
+          Современное веб-приложение на стеке MongoDB, Express, React и Node.js с Docker-контейнеризацией
+        </Paragraph>
+
+        <Divider style={{ margin: '32px 0' }} />
+
+        <Row gutter={[32, 32]}>
+          <Col xs={24} md={8}>
+            <div
+              style={cardStyle(0)}
+              onMouseEnter={() => setHoveredCard(0)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
+              <div style={{
+                textAlign: 'center',
+                padding: '36px 0',
+                background: theme === 'dark' ? '#2d2d2d' : '#f9f9f9'
+              }}>
+                <SafetyOutlined style={{ fontSize: 56, color: theme === 'dark' ? '#1890ff' : '#1890ff' }} />
+              </div>
+              <div style={{ padding: '24px' }}>
+                <h2 style={{ marginTop: 0, fontWeight: 'bold' }}>Безопасность</h2>
+                <p style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: '16px' }}>
+                  JWT-аутентификация и разделение ролей администраторов и пользователей.
+                </p>
+              </div>
             </div>
-            <h2 className="text-lg font-medium mb-2">Безопасная аутентификация</h2>
-            <p className="text-sm text-muted-foreground">JWT-токены для безопасного доступа с разделением ролей пользователей</p>
-          </div>
-          
-          <div className="bg-card p-6 rounded border border-border">
-            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <div
+              style={cardStyle(1)}
+              onMouseEnter={() => setHoveredCard(1)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
+              <div style={{
+                textAlign: 'center',
+                padding: '36px 0',
+                background: theme === 'dark' ? '#2d2d2d' : '#f9f9f9'
+              }}>
+                <BulbOutlined style={{ fontSize: 56, color: theme === 'dark' ? '#faad14' : '#faad14' }} />
+              </div>
+              <div style={{ padding: '24px' }}>
+                <h2 style={{ marginTop: 0, fontWeight: 'bold' }}>Темная тема</h2>
+                <p style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: '16px' }}>
+                  Поддержка светлой и темной темы для комфортной работы с приложением.
+                </p>
+              </div>
             </div>
-            <h2 className="text-lg font-medium mb-2">Темная тема</h2>
-            <p className="text-sm text-muted-foreground">Переключение между светлой и темной темой с сохранением выбора</p>
-          </div>
-          
-          <div className="bg-card p-6 rounded border border-border">
-            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <div
+              style={cardStyle(2)}
+              onMouseEnter={() => setHoveredCard(2)}
+              onMouseLeave={() => setHoveredCard(null)}
+            >
+              <div style={{
+                textAlign: 'center',
+                padding: '36px 0',
+                background: theme === 'dark' ? '#2d2d2d' : '#f9f9f9'
+              }}>
+                <CheckSquareOutlined style={{ fontSize: 56, color: theme === 'dark' ? '#52c41a' : '#52c41a' }} />
+              </div>
+              <div style={{ padding: '24px' }}>
+                <h2 style={{ marginTop: 0, fontWeight: 'bold' }}>Логирование</h2>
+                <p style={{ color: theme === 'dark' ? '#bbb' : '#666', fontSize: '16px' }}>
+                  Детальное отслеживание активности пользователей и действий в системе.
+                </p>
+              </div>
             </div>
-            <h2 className="text-lg font-medium mb-2">Продвинутое логирование</h2>
-            <p className="text-sm text-muted-foreground">Система логирования активности пользователей с детальной историей</p>
-          </div>
-        </section>
-        
-        <div className="flex justify-center gap-4">
-          <Link 
-            to="/login" 
-            className="px-5 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors"
+          </Col>
+        </Row>
+
+        <div style={{ marginTop: 48 }}>
+          <Button
+            type="primary"
+            size="large"
+            style={{
+              marginRight: 16,
+              height: '48px',
+              fontSize: '16px',
+              padding: '0 24px'
+            }}
           >
-            Войти в систему
-          </Link>
-          <Link 
-            to="/register" 
-            className="px-5 py-2 bg-secondary text-foreground rounded hover:bg-tertiary transition-colors"
+            <Link to="/login">Войти</Link>
+          </Button>
+          <Button
+            size="large"
+            style={{
+              height: '48px',
+              fontSize: '16px',
+              padding: '0 24px'
+            }}
           >
-            Регистрация
-          </Link>
+            <Link to="/register">Регистрация</Link>
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Для авторизованных пользователей - с сохранением счетчика
+  // Аутентифицированный интерфейс (для обычного пользователя и администратора)
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Панель управления</h1>
-      
-      {/* Счетчик - восстановлен */}
-      <div className="bg-card p-6 rounded border border-border mb-6 text-center">
-        <h2 className="text-lg font-medium mb-4">Интерактивный счетчик</h2>
-        <div className="text-6xl font-bold mb-6 bg-primary/10 w-24 h-24 rounded-full flex items-center justify-center text-primary mx-auto">
-          {count}
+    <div style={{
+      maxWidth: '1200px',
+      margin: '30px auto',
+      padding: '20px',
+      background: theme === 'dark' ? '#1f1f1f' : 'white',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    }}>
+      {isAdmin ? (
+        // Интерфейс администратора
+        <div>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: '30px' }}>
+            Панель администратора
+          </Title>
+
+          <Tabs defaultActiveKey="1" style={{ marginBottom: '20px' }}>
+            <TabPane tab={
+              <span>
+                <UserOutlined /> Основное
+              </span>
+            } key="1">
+              <div style={{
+                textAlign: 'center',
+                padding: '30px',
+                background: theme === 'dark' ? '#141414' : '#f9f9f9',
+                borderRadius: '8px'
+              }}>
+                <div style={{ marginBottom: '30px' }}>
+                  <Badge
+                    count={count}
+                    showZero
+                    style={{
+                      backgroundColor: '#1890ff',
+                      fontSize: '16px',
+                      padding: '0 12px',
+                      height: '28px',
+                      lineHeight: '28px'
+                    }}
+                  >
+                    <div style={{
+                      width: '100px',
+                      height: '100px',
+                      lineHeight: '100px',
+                      fontSize: '20px',
+                      background: theme === 'dark' ? '#2d2d2d' : '#f0f0f0',
+                      borderRadius: '50%',
+                      margin: '0 auto'
+                    }}>
+                      Счетчик
+                    </div>
+                  </Badge>
+                </div>
+
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleIncrement}
+                  size="large"
+                  style={{ padding: '0 24px', height: '45px' }}
+                >
+                  Увеличить счетчик
+                </Button>
+
+                <Paragraph style={{ marginTop: '20px', fontSize: '16px' }}>
+                  Текущая тема: <strong>{theme === 'dark' ? 'Темная' : 'Светлая'}</strong>
+                </Paragraph>
+              </div>
+            </TabPane>
+
+            <TabPane tab={
+              <span>
+                <LineChartOutlined /> Логирование
+              </span>
+            } key="2">
+              <LoggingControl />
+            </TabPane>
+          </Tabs>
         </div>
-        <button 
-          onClick={handleIncrement}
-          className="px-4 py-2 bg-primary text-white rounded text-sm hover:bg-primary-hover transition-colors"
-        >
-          Увеличить счетчик
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-card p-6 rounded border border-border">
-          <h2 className="text-lg font-medium mb-4">Активность пользователя</h2>
-          <p className="text-muted-foreground mb-4">
-            Просмотр и управление логами действий пользователя в системе
-          </p>
-          <button className="px-4 py-2 bg-primary text-white rounded text-sm hover:bg-primary-hover transition-colors">
-            Открыть логи
-          </button>
-        </div>
-        
-        <div className="bg-card p-6 rounded border border-border">
-          <h2 className="text-lg font-medium mb-4">Управление задачами</h2>
-          <p className="text-muted-foreground mb-4">
-            Создание и управление задачами в системе
-          </p>
-          <button className="px-4 py-2 bg-primary text-white rounded text-sm hover:bg-primary-hover transition-colors">
-            Перейти к задачам
-          </button>
-        </div>
-      </div>
-      
-      {/* Панель администратора с просмотром логов - восстановлена */}
-      {isAdmin && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Панель администратора</h2>
-          <div className="bg-card rounded border border-border overflow-hidden">
-            <div className="bg-secondary/50 p-4 border-b border-border">
-              <h3 className="font-medium">Управление логированием</h3>
+      ) : (
+        // Интерфейс обычного пользователя
+        <div>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: '30px' }}>
+            Личный кабинет пользователя
+          </Title>
+
+          <div style={{
+            textAlign: 'center',
+            padding: '50px',
+            background: theme === 'dark' ? '#141414' : '#f9f9f9',
+            borderRadius: '8px'
+          }}>
+            <div style={{ marginBottom: '40px' }}>
+              <Badge
+                count={count}
+                showZero
+                style={{
+                  backgroundColor: '#1890ff',
+                  fontSize: '16px',
+                  padding: '0 12px',
+                  height: '28px',
+                  lineHeight: '28px'
+                }}
+              >
+                <div style={{
+                  width: '120px',
+                  height: '120px',
+                  lineHeight: '120px',
+                  fontSize: '22px',
+                  background: theme === 'dark' ? '#2d2d2d' : '#f0f0f0',
+                  borderRadius: '50%',
+                  margin: '0 auto'
+                }}>
+                  Счетчик
+                </div>
+              </Badge>
             </div>
-            <LoggingControl />
+
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleIncrement}
+              size="large"
+              style={{ padding: '0 30px', height: '48px', fontSize: '16px' }}
+            >
+              Увеличить счетчик
+            </Button>
+
+            <Paragraph style={{ marginTop: '20px', fontSize: '16px' }}>
+              Текущая тема: <strong>{theme === 'dark' ? 'Темная' : 'Светлая'}</strong>
+            </Paragraph>
           </div>
         </div>
       )}
@@ -132,4 +301,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home; 
+export default Home;

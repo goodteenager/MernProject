@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import logger from '../services/logger.ts';
+import logger from '../services/logger';
 
 /**
  * Хук для логирования жизненного цикла компонента
@@ -8,21 +8,21 @@ import logger from '../services/logger.ts';
 const useLogger = (componentName: string) => {
   useEffect(() => {
     // Логируем монтирование компонента
-    logger.mounted(componentName);
+    logger.componentDidMount(componentName);
 
     // Логируем размонтирование компонента при удалении
     return () => {
-      logger.unmounted(componentName);
+      logger.componentWillUnmount(componentName);
     };
   }, [componentName]);
 
   // Возвращаем объект логгера для использования внутри компонента
   return {
-    log: (message: string, data?: any) => logger.info(componentName, message, data),
-    info: (message: string, data?: any) => logger.info(componentName, message, data),
-    warn: (message: string, data?: any) => logger.warn(componentName, message, data),
-    error: (message: string, data?: any) => logger.error(componentName, message, data),
-    debug: (message: string, data?: any) => logger.debug(componentName, message, data),
+    log: (message: string, data?: any) => logger.info(componentName, message),
+    info: (message: string, data?: any) => logger.info(componentName, message),
+    warn: (message: string, data?: any) => logger.warn(componentName, message),
+    error: (message: string, data?: any) => logger.error(componentName, message),
+    debug: (message: string, data?: any) => logger.debug(componentName, message),
   };
 };
 

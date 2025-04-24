@@ -1,114 +1,116 @@
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import ThemeToggle from './ThemeToggle';
-import useLogger from '../hooks/useLogger';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Layout as AntLayout, Menu, Button, Space, Dropdown } from "antd";
+import { 
+  UserOutlined, 
+  LogoutOutlined, 
+  LoginOutlined, 
+  UserAddOutlined,
+  MenuOutlined,
+  BulbOutlined,
+  BulbFilled
+} from "@ant-design/icons";
+import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
+
+const { Header, Content, Footer } = AntLayout;
+
+const ThemeToggle: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
+  
+  return (
+    <Button 
+      type="text" 
+      icon={theme === 'dark' ? <BulbOutlined /> : <BulbFilled />} 
+      onClick={toggleTheme}
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    />
+  );
+};
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAuthenticated, logout, isAdmin } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
-  const logger = useLogger('Layout');
-
+  const { isAuthenticated, user, logout } = useAuth();
+  
   const handleLogout = () => {
-    logger.info('Пользователь вышел из системы');
     logout();
-    navigate('/login');
   };
 
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="profile" icon={<UserOutlined />}>
+        Профиль
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+        Выйти
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Минималистичная навигационная панель */}
-      <header className="border-b border-border bg-background py-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <Link to="/" className="text-xl font-semibold text-primary">MERN App</Link>
+    <AntLayout className="min-h-screen">
+      <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Link to="/">
+            <h1 style={{ color: 'white', margin: 0, fontSize: '1.5rem' }}>
+              MERN App
+            </h1>
+          </Link>
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[location.pathname]}
+            style={{ marginLeft: 20 }}
+          >
+            <Menu.Item key="/">
+              <Link to="/">Главная</Link>
+            </Menu.Item>
+            <Menu.Item key="/dashboard">
+              <Link to="/dashboard">Панель</Link>
+            </Menu.Item>
+          </Menu>
+        </div>
+        
+        <Space>
+          <ThemeToggle />
           
-          <div className="flex items-center gap-6">
-            <nav className="hidden md:flex items-center gap-6">
-              <Link 
-                to="/" 
-                className={`text-sm ${location.pathname === '/' ? 'text-primary font-medium' : 'text-foreground'}`}
+          {isAuthenticated ? (
+            <Dropdown overlay={userMenu} trigger={['click']}>
+              <Button type="text" style={{ color: 'white' }}>
+                <Space>
+                  <UserOutlined />
+                  {user?.username}
+                </Space>
+              </Button>
+            </Dropdown>
+          ) : (
+            <Space>
+              <Button 
+                type={location.pathname === '/login' ? 'primary' : 'text'} 
+                icon={<LoginOutlined />}
               >
-                Главная
-              </Link>
-              
-              {isAuthenticated && isAdmin && (
-                <Link 
-                  to="/admin" 
-                  className={`text-sm ${location.pathname === '/admin' ? 'text-primary font-medium' : 'text-foreground'}`}
-                >
-                  Админ
-                </Link>
-              )}
-            </nav>
-            
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <div className="hidden md:flex items-center gap-2">
-                    <span className="text-sm font-medium">{user?.username}</span>
-                  </div>
-                  
-                  <button 
-                    onClick={handleLogout}
-                    className="text-sm px-3 py-1.5 bg-secondary rounded hover:bg-tertiary transition-colors"
-                  >
-                    Выйти
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Link 
-                    to="/login" 
-                    className={`text-sm px-3 py-1.5 rounded transition-colors ${
-                      location.pathname === '/login' 
-                        ? 'bg-primary text-white' 
-                        : 'bg-secondary hover:bg-tertiary'
-                    }`}
-                  >
-                    Войти
-                  </Link>
-                  <Link 
-                    to="/register"
-                    className={`text-sm px-3 py-1.5 rounded transition-colors ${
-                      location.pathname === '/register' 
-                        ? 'bg-primary text-white' 
-                        : 'bg-secondary hover:bg-tertiary'
-                    }`}
-                  >
-                    Регистрация
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+                <Link to="/login">Войти</Link>
+              </Button>
+              <Button 
+                type={location.pathname === '/register' ? 'primary' : 'text'} 
+                icon={<UserAddOutlined />}
+              >
+                <Link to="/register">Регистрация</Link>
+              </Button>
+            </Space>
+          )}
+        </Space>
+      </Header>
 
-      {/* Основной контент */}
-      <main className="flex-grow py-10">
-        <div className="container mx-auto">
-          {children}
-        </div>
-      </main>
+      <Content style={{ padding: '24px 50px' }}>
+        <div className="container">{children}</div>
+      </Content>
 
-      {/* Минималистичный футер */}
-      <footer className="py-6 border-t border-border bg-background">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <Link to="/" className="text-primary font-medium">MERN App</Link>
-              <p className="text-xs text-muted-foreground mt-1">Полнофункциональное приложение на стеке MERN</p>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} MERN Application с Docker
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+      <Footer style={{ textAlign: 'center' }}>
+        MERN Stack Application ©{new Date().getFullYear()} Created with Ant Design
+      </Footer>
+    </AntLayout>
   );
 };
 

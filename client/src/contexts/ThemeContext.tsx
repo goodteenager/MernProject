@@ -1,63 +1,77 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
 }
 
-// Create the context with a default value
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Theme provider props interface
-interface ThemeProviderProps {
-  children: ReactNode;
-}
-
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Get initial theme from localStorage or use 'light' as default
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'light';
+    // Получаем тему из localStorage или используем системную
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    return savedTheme || 'system';
   });
 
-  // Toggle between light and dark themes
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
-  // Update theme in localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    const root = window.document.documentElement;
     
-    // Apply theme to document
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    // Удаляем предыдущие классы
+    root.classList.remove('light', 'dark');
+
+    // Применяем тему
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      root.classList.add(systemTheme);
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.add(theme);
+    }
+
+    // Сохраняем в localStorage
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // Отслеживаем изменения системной темы
+  useEffect(() => {
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      const handleChange = () => {
+        const root = window.document.documentElement;
+        if (mediaQuery.matches) {
+          root.classList.remove('light');
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+          root.classList.add('light');
+        }
+      };
+
+      mediaQuery.addEventListener('change', handleChange);
+      
+      // Вызываем сразу для установки начальной темы
+      handleChange();
+
+      return () => mediaQuery.removeEventListener('change', handleChange);
     }
   }, [theme]);
 
-  const value = {
-    theme,
-    toggleTheme,
-    setTheme,
-  };
-
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}
 
-// Custom hook for using the theme context
-export const useTheme = (): ThemeContextType => {
+export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-}; 
+};

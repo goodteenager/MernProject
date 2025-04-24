@@ -1,43 +1,100 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Для Ant Design 5.x используем: */
+/*@import 'antd/dist/reset.css';*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Чистая минималистичная цветовая схема */
-    --background: #ffffff;
-    --foreground: #1a1a1a;
-    --primary: #4361ee;
-    --primary-hover: #3a56d4;
-    --secondary: #f5f7fa;
-    --tertiary: #f0f4f8;
-    --card: #ffffff;
-    --card-foreground: #1a1a1a;
-    --muted-foreground: #6b7280;
-    --border: #e5e7eb;
-    --input: #f3f4f6;
-    --ring: #c7d2fe;
-    --destructive: #ef4444;
-    --success: #10b981;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+    --primary-color: #1890ff;
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #f5222d;
+    --font-size-base: 14px;
+    --heading-color: rgba(0, 0, 0, 0.85);
+    --text-color: rgba(0, 0, 0, 0.65);
+    --text-color-secondary: rgba(0, 0, 0, 0.45);
+    --disabled-color: rgba(0, 0, 0, 0.25);
+    --border-radius-base: 4px;
+    --border-color-base: #d9d9d9;
+    --box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --primary: #4361ee;
-    --primary-hover: #818cf8;
-    --secondary: #1e293b;
-    --tertiary: #0f172a;
-    --card: #1e293b;
-    --card-foreground: #f8fafc;
-    --muted-foreground: #94a3b8;
-    --border: #2e3b4e;
-    --input: #1e293b;
-    --ring: #3b82f6;
-    --destructive: #f43f5e;
-    --success: #10b981;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --primary-color: #177ddc;
+    --success-color: #49aa19;
+    --warning-color: #d89614;
+    --error-color: #a61d24;
+    --heading-color: rgba(255, 255, 255, 0.85);
+    --text-color: rgba(255, 255, 255, 0.65);
+    --text-color-secondary: rgba(255, 255, 255, 0.45);
+    --disabled-color: rgba(255, 255, 255, 0.25);
+    --border-color-base: #434343;
+    --box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -209,5 +266,98 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Темная тема */
+.dark body {
+  background-color: #141414;
+  color: var(--text-color);
+}
+
+/* Кастомизация прокрутки */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #303030;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #505050;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #707070;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  background-color: hsl(var(--muted));
+  border-radius: 20px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.toggle:after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: white;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s;
+}
+
+input[type='checkbox']:checked + .toggle {
+  background-color: hsl(var(--primary));
+}
+
+input[type='checkbox']:checked + .toggle:after {
+  transform: translateX(20px);
+}
+
+input[type='checkbox'] {
+  display: none;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 640px) {
+  html, body {
+    overscroll-behavior: none;
+  }
+
+  .main-content {
+    padding-bottom: 70px; /* Место для нижней навигации */
   }
 }

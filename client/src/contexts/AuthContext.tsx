@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'user' | 'admin';
-}
+import { authService } from '../services/authService';
+import { User } from '../types/user';
 
 interface AuthContextType {
   user: User | null;
@@ -14,104 +8,87 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const checkLoggedIn = async () => {
+    // Проверяем, есть ли пользователь в localStorage
+    const loadUser = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        // Configure axios headers
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Fetch user data
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/me`);
-        
-        if (response.data.success) {
-          setUser(response.data.data);
-        } else {
-          localStorage.removeItem('token');
+        setLoading(true);
+        if (authService.isAuthenticated()) {
+          const currentUser = authService.getCurrentUser();
+          if (currentUser) {
+            // Обновляем данные пользователя с сервера
+            const freshUser = await authService.getProfile();
+            setUser(freshUser);
+          }
         }
       } catch (err) {
-        localStorage.removeItem('token');
-        console.error('Auth check failed:', err);
+        console.error('Ошибка при загрузке пользователя:', err);
+        authService.logout();
       } finally {
         setLoading(false);
       }
     };
 
-    checkLoggedIn();
+    loadUser();
   }, []);
 
-  // Login function
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-        email,
-        password
-      });
-
-      if (response.data.success) {
-        localStorage.setItem('token', response.data.token);
-        setUser(response.data.user);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      }
+      const response = await authService.login({ email, password });
+      setUser(response.user);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка входа');
+      setError(err.response?.data?.error || 'Ошибка при входе');
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Register function
   const register = async (username: string, email: string, password: string) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-        username,
-        email,
-        password
-      });
-
-      if (response.data.success) {
-        localStorage.setItem('token', response.data.token);
-        setUser(response.data.user);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      }
+      const response = await authService.register({ username, email, password });
+      setUser(response.user);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Ошибка регистрации');
+      setError(err.response?.data?.error || 'Ошибка при регистрации');
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await authService.logout();
+      setUser(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Ошибка при выходе');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...userData });
+      // Обновляем пользователя в localStorage
+      localStorage.setItem('user', JSON.stringify({ ...user, ...userData }));
+    }
   };
 
   return (
@@ -123,8 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin'
+        updateUser,
       }}
     >
       {children}
@@ -132,7 +108,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
