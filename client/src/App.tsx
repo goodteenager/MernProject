@@ -22,12 +22,13 @@ import CreateReport from './pages/CreateReport';
 
 import Settings from './pages/Settings';
 
+// Создаем клиент для React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 5 * 60 * 1000, // 5 минут
     },
   },
 });
@@ -39,12 +40,14 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
+              {/* Публичные маршруты с AuthLayout */}
               <Route path="/" element={<AuthLayout />}>
                 <Route index element={<Navigate to="/login" replace />} />
                 <Route path="login" element={<Login />} />
                 <Route path="register" element={<Register />} />
               </Route>
 
+              {/* Защищенные маршруты с MainLayout */}
               <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="profile" element={<Profile />} />
@@ -55,6 +58,7 @@ function App() {
                 <Route path="reports/create" element={<CreateReport />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
+
             </Routes>
           </Router>
           <Toaster />
