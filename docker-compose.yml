@@ -35,11 +35,6 @@ services:
       - JWT_SECRET=your_jwt_secret_key
       - NODE_ENV=development
       - SERVER_ID=server1
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5000/api/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - mern-network
 
@@ -75,7 +70,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     environment:
-      - VITE_API_URL=http://load-balancer/api/v1  # Используйте публичный URL балансировщика
+      - VITE_API_URL=http://localhost:5000/api/v1 # Используйте публичный URL балансировщика
     networks:
       - mern-network
 

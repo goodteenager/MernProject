@@ -23,12 +23,6 @@ export default defineConfig({
     watch: {
       usePolling: true, // <--- важно для Docker
     },
-    proxy: {
-      '/api/v1': {
-        target: 'http://localhost',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/v1/, '')
-      }
-    }
+    allowedHosts: ['load-balancer'] // <-- Разрешаем хост балансировщика
   }
 })

@@ -53,8 +53,8 @@ app.use((req, res, next) => {
 // Используйте после этого вашу стандартную конфигурацию CORS
 // Настройка CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // URL вашего фронтенда
-  credentials: true // Разрешаем передачу куки
+  origin: "*", // Временно разрешить все источники
+  credentials: true
 }));
 
 // Безопасная настройка trust proxy
@@ -133,14 +133,7 @@ app.use('*', (req, res) => {
 // Обработка ошибок
 app.use(errorHandler);
 
-// Endpoint для проверки здоровья системы
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    server: process.env.SERVER_ID || 'unknown',
-    timestamp: new Date().toISOString()
-  });
-});
+
 
 // Подключение к MongoDB
 mongoose

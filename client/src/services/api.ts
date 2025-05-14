@@ -1,16 +1,11 @@
 import axios from 'axios';
 
-// Исправляем базовый URL, убираем лишнее /api/v1, так как это будет добавлено в proxy
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-// Создаем инстанс axios с базовыми настройками
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  // Временно отключим для тестирования
-  // withCredentials: true, // Включаем передачу куки для аутентификации
 });
 
 // api.ts

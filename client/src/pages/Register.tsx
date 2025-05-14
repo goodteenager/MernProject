@@ -14,7 +14,7 @@ import {
   EyeOff,
   ArrowRight,
   AlertTriangle,
-  Flame
+  Flame,
 } from 'lucide-react';
 
 const Register: React.FC = () => {
@@ -25,7 +25,7 @@ const Register: React.FC = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -33,7 +33,7 @@ const Register: React.FC = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -84,11 +84,11 @@ const Register: React.FC = () => {
   // Input change handler
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Validate as user types
     const error = validateField(name, value);
-    setFormErrors(prev => ({ ...prev, [name]: error }));
+    setFormErrors((prev) => ({ ...prev, [name]: error }));
 
     // Clear global error when user starts typing
     if (error) setError('');
@@ -105,13 +105,13 @@ const Register: React.FC = () => {
       username: validateField('username', formData.username),
       email: validateField('email', formData.email),
       password: validateField('password', formData.password),
-      confirmPassword: validateField('confirmPassword', formData.confirmPassword)
+      confirmPassword: validateField('confirmPassword', formData.confirmPassword),
     };
 
     setFormErrors(errors);
 
     // Check if there are any errors
-    if (Object.values(errors).some(error => error)) {
+    if (Object.values(errors).some((error) => error)) {
       setError('Пожалуйста, исправьте ошибки в форме');
       setIsLoading(false);
       return;
@@ -159,7 +159,7 @@ const Register: React.FC = () => {
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
               animationDuration: `${Math.random() * 5 + 3}s`,
-              animationDelay: `${Math.random() * 5}s`
+              animationDelay: `${Math.random() * 5}s`,
             }}
           />
         ))}
@@ -171,7 +171,7 @@ const Register: React.FC = () => {
         style={{
           left: mousePosition.x - 128,
           top: mousePosition.y - 128,
-          transition: 'transform 0.2s ease-out'
+          transition: 'transform 0.2s ease-out',
         }}
       />
 
@@ -202,9 +202,7 @@ const Register: React.FC = () => {
                     IYouWe
                   </h1>
                 </div>
-                <p className="text-gray-300 text-sm">
-                  Создай героя и начни приключение
-                </p>
+                <p className="text-gray-300 text-sm">Создай героя и начни приключение</p>
               </div>
 
               {/* Error message */}
@@ -230,7 +228,9 @@ const Register: React.FC = () => {
                         onChange={handleInputChange}
                         placeholder="IYouWe"
                         className={`w-full bg-gray-800/60 border ${
-                          formErrors.username ? 'border-red-500/50' : 'border-indigo-500/20 focus:border-indigo-500/60'
+                          formErrors.username
+                            ? 'border-red-500/50'
+                            : 'border-indigo-500/20 focus:border-indigo-500/60'
                         } rounded-lg p-2 pl-8 text-gray-100 outline-none transition-all duration-300 text-sm`}
                       />
                       <User className="absolute left-2.5 top-2.5 text-indigo-400" size={16} />
@@ -262,7 +262,9 @@ const Register: React.FC = () => {
                         onChange={handleInputChange}
                         placeholder="iyouwe@gmail.com"
                         className={`w-full bg-gray-800/60 border ${
-                          formErrors.email ? 'border-red-500/50' : 'border-indigo-500/20 focus:border-indigo-500/60'
+                          formErrors.email
+                            ? 'border-red-500/50'
+                            : 'border-indigo-500/20 focus:border-indigo-500/60'
                         } rounded-lg p-2 pl-8 text-gray-100 outline-none transition-all duration-300 text-sm`}
                       />
                       <Mail className="absolute left-2.5 top-2.5 text-indigo-400" size={16} />
@@ -276,9 +278,7 @@ const Register: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {formErrors.email && (
-                      <p className="text-red-400 text-xs">{formErrors.email}</p>
-                    )}
+                    {formErrors.email && <p className="text-red-400 text-xs">{formErrors.email}</p>}
                   </div>
 
                   {/* Password field */}
@@ -289,12 +289,14 @@ const Register: React.FC = () => {
                     <div className="relative">
                       <input
                         name="password"
-                        type={passwordVisible ? "text" : "password"}
+                        type={passwordVisible ? 'text' : 'password'}
                         value={formData.password}
                         onChange={handleInputChange}
                         placeholder="••••••••"
                         className={`w-full bg-gray-800/60 border ${
-                          formErrors.password ? 'border-red-500/50' : 'border-indigo-500/20 focus:border-indigo-500/60'
+                          formErrors.password
+                            ? 'border-red-500/50'
+                            : 'border-indigo-500/20 focus:border-indigo-500/60'
                         } rounded-lg p-2 pl-8 pr-8 text-gray-100 outline-none transition-all duration-300 text-sm`}
                       />
                       <Lock className="absolute left-2.5 top-2.5 text-indigo-400" size={16} />
@@ -313,8 +315,11 @@ const Register: React.FC = () => {
                       <div className="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${
-                            formData.password.length < 8 ? 'bg-red-500' :
-                              formData.password.length < 10 ? 'bg-yellow-500' : 'bg-green-500'
+                            formData.password.length < 8
+                              ? 'bg-red-500'
+                              : formData.password.length < 10
+                                ? 'bg-yellow-500'
+                                : 'bg-green-500'
                           } transition-all duration-300`}
                           style={{ width: `${Math.min(100, formData.password.length * 10)}%` }}
                         />
@@ -330,12 +335,14 @@ const Register: React.FC = () => {
                     <div className="relative">
                       <input
                         name="confirmPassword"
-                        type={confirmPasswordVisible ? "text" : "password"}
+                        type={confirmPasswordVisible ? 'text' : 'password'}
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
                         placeholder="••••••••"
                         className={`w-full bg-gray-800/60 border ${
-                          formErrors.confirmPassword ? 'border-red-500/50' : 'border-indigo-500/20 focus:border-indigo-500/60'
+                          formErrors.confirmPassword
+                            ? 'border-red-500/50'
+                            : 'border-indigo-500/20 focus:border-indigo-500/60'
                         } rounded-lg p-2 pl-8 pr-8 text-gray-100 outline-none transition-all duration-300 text-sm`}
                       />
                       <Lock className="absolute left-2.5 top-2.5 text-indigo-400" size={16} />
@@ -363,9 +370,25 @@ const Register: React.FC = () => {
                   >
                     {isLoading ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Создание портала...
                       </>
@@ -373,7 +396,10 @@ const Register: React.FC = () => {
                       <>
                         <Sparkles className="h-4 w-4 mr-1" />
                         Начать приключение
-                        <ArrowRight className="ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" size={16} />
+                        <ArrowRight
+                          className="ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                          size={16}
+                        />
                       </>
                     )}
                   </button>
@@ -388,7 +414,8 @@ const Register: React.FC = () => {
                 >
                   Уже имеешь магический артефакт?
                   <span className="ml-1 inline-flex items-center group-hover:underline">
-                    Войти <ArrowRight className="ml-0.5 h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                    Войти{' '}
+                    <ArrowRight className="ml-0.5 h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </Link>
               </div>
@@ -401,7 +428,7 @@ const Register: React.FC = () => {
 };
 
 // Add these keyframes to your global CSS or style tag
-const styleSheet = document.createElement("style");
+const styleSheet = document.createElement('style');
 styleSheet.textContent = `
 @keyframes slow-spin {
   from { transform: rotate(0deg); }
