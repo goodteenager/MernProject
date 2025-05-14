@@ -21,8 +21,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     watch: {
-      usePolling: true, // <--- важно для Docker
+      usePolling: true,
     },
-    allowedHosts: ['load-balancer'] // <-- Разрешаем хост балансировщика
-  }
+  },
+  // Добавьте настройку для обработки публичных ресурсов
+  publicDir: 'public',
 })

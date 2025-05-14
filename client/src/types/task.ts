@@ -56,8 +56,9 @@ export interface TaskCreateData {
   difficulty?: string;
   dueDate?: string;
   repeatDays?: string[];
+  reminderTime?: string;
   skills?: string[];
-  tags?: string[];
+  tags?: string | string[];
 }
 
 export interface TaskUpdateData {

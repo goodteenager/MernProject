@@ -70,7 +70,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     environment:
-      - VITE_API_URL=http://localhost:5000/api/v1 # Используйте публичный URL балансировщика
+      - VITE_API_URL=/api/v1 # Используйте публичный URL балансировщика
     networks:
       - mern-network
 

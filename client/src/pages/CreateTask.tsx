@@ -71,13 +71,21 @@ const CreateTask: React.FC = () => {
     setError('');
 
     try {
-      // Удаляем вложенный setTimeout - это может создавать проблемы
+      // Add default reminderTime if not provided
+      if (!data.reminderTime) {
+        data.reminderTime = '09:00'; // Default reminder time
+      }
+      
+      // Convert tags if needed
+      if (typeof data.tags === 'string') {
+        data.tags = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      }
+      
       const result = await taskService.createTask(data);
       
       setSuccess('Задача успешно создана! Переход к списку задач...');
       setShowSuccessAnimation(true);
-
-      // Редирект после анимации успеха
+      
       setTimeout(() => {
         navigate('/tasks');
       }, 2000);

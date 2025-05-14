@@ -63,7 +63,7 @@ app.set('trust proxy', 'loopback, linklocal, uniquelocal');
 // Заменяем небезопасный rateLimit на более безопасный
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // максимум 100 запросов за период
+  max: 500, // максимум 100 запросов за период
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
@@ -105,6 +105,19 @@ app.use((req, res, next) => {
   console.log(`[${SERVER_ID}] ${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
+
+// Создаем специальный rate limiter для аутентификации с более высоким лимитом
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 50, // разрешаем больше попыток для аутентификации
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Слишком много запросов на аутентификацию, пожалуйста, попробуйте позже'
+});
+
+// Применяем этот лимитер только к путям аутентификации
+app.use('/api/v1/auth/login', authLimiter);
+app.use('/api/v1/auth/register', authLimiter);
 
 // Маршруты
 app.use('/api/v1/auth', authRoutes);
